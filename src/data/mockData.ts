@@ -1,0 +1,123 @@
+import { Vehicle, Booking } from '@/types';
+
+export const mockVehicles: Vehicle[] = [
+  {
+    id: '1',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    category: 'sedan',
+    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=800',
+    dailyRate: 45,
+    transmission: 'automatic',
+    fuelType: 'petrol',
+    seats: 5,
+    status: 'available',
+    location: 'Downtown Office',
+    rating: 4.5,
+    features: ['Bluetooth', 'Backup Camera', 'Cruise Control']
+  },
+  {
+    id: '2',
+    make: 'BMW',
+    model: 'X5',
+    year: 2024,
+    category: 'luxury',
+    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800',
+    dailyRate: 120,
+    transmission: 'automatic',
+    fuelType: 'petrol',
+    seats: 7,
+    status: 'available',
+    location: 'Airport Terminal',
+    rating: 4.8,
+    features: ['Leather Seats', 'Navigation', 'Sunroof', 'Premium Audio']
+  },
+  {
+    id: '3',
+    make: 'Tesla',
+    model: 'Model 3',
+    year: 2024,
+    category: 'luxury',
+    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800',
+    dailyRate: 95,
+    transmission: 'automatic',
+    fuelType: 'electric',
+    seats: 5,
+    status: 'rented',
+    location: 'Downtown Office',
+    rating: 4.9,
+    features: ['Autopilot', 'Premium Interior', 'Supercharger Access']
+  },
+  {
+    id: '4',
+    make: 'Honda',
+    model: 'CR-V',
+    year: 2023,
+    category: 'suv',
+    image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800',
+    dailyRate: 65,
+    transmission: 'automatic',
+    fuelType: 'hybrid',
+    seats: 5,
+    status: 'available',
+    location: 'North Branch',
+    rating: 4.6,
+    features: ['AWD', 'Apple CarPlay', 'Lane Assist']
+  },
+  {
+    id: '5',
+    make: 'Mercedes',
+    model: 'C-Class',
+    year: 2024,
+    category: 'luxury',
+    image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800',
+    dailyRate: 110,
+    transmission: 'automatic',
+    fuelType: 'petrol',
+    seats: 5,
+    status: 'available',
+    location: 'Downtown Office',
+    rating: 4.7,
+    features: ['Premium Sound', 'Massage Seats', 'Ambient Lighting']
+  },
+  {
+    id: '6',
+    make: 'Ford',
+    model: 'Mustang',
+    year: 2023,
+    category: 'sports',
+    image: 'https://images.unsplash.com/photo-1584345604476-8ec5f5df2737?w=800',
+    dailyRate: 85,
+    transmission: 'manual',
+    fuelType: 'petrol',
+    seats: 4,
+    status: 'available',
+    location: 'Airport Terminal',
+    rating: 4.4,
+    features: ['Sport Mode', 'Performance Package', 'Premium Audio']
+  },
+];
+
+export const mockBookings: Booking[] = [
+  {
+    id: 'BK001',
+    vehicleId: '3',
+    customerId: '3',
+    pickupDate: new Date('2024-01-15'),
+    returnDate: new Date('2024-01-20'),
+    status: 'active',
+    totalPrice: 475,
+    location: 'Downtown Office'
+  },
+  {
+    id: 'BK002',
+    vehicleId: '1',
+    customerId: '3',
+    pickupDate: new Date('2024-01-25'),
+    returnDate: new Date('2024-01-27'),
+    status: 'confirmed',
+    totalPrice: 90,
+    location: 'Downtown Office'
+  },
+];
