@@ -1,9 +1,6 @@
-// Lightweight API client for Car Rental frontend
-// Uses VITE_API_BASE_URL or defaults to http://localhost:5000
-
 import type { Vehicle, Booking } from '@/types';
 
-const API_BASE: string = (import.meta as { env?: { VITE_API_BASE_URL?: string } })?.env?.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE: string = (import.meta as { env?: { VITE_API_BASE_URL?: string } })?.env?.VITE_API_BASE_URL;
 
 function buildQuery(params: Record<string, string | number | boolean> = {}): string {
   const qs = new URLSearchParams();
@@ -54,7 +51,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
-// Map server vehicle {_id,...} to client Vehicle {id,...}
 function mapVehicle(v: Record<string, unknown>): Vehicle {
   return {
     id: v._id || v.id,

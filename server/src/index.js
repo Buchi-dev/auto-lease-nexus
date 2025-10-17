@@ -3,14 +3,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { connectMongo } = require('./configs/mongo.config');
 
-// Load environment variables if .env exists (optional dependency pattern)
-try {
-  require('dotenv').config();
-} catch (_) {
-  // dotenv may not be installed; ignore
-}
+require('dotenv').config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 async function start() {
   const app = express();
@@ -62,7 +57,6 @@ async function start() {
   const shutdown = (signal) => {
     console.log(`\nReceived ${signal}. Shutting down...`);
     server.close(() => {
-      // Mongoose will close on process exit; explicit close can be added if needed
       process.exit(0);
     });
     // Fallback: force exit after timeout

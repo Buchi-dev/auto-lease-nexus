@@ -2,14 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User } from '@/types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, role?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, role?: string) => Promise<void>;
   fetchMe: () => Promise<void>;
   logout: () => void;
 }
@@ -32,17 +32,17 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      login: async (email: string, password: string) => {
+      login: async (email: string, password: string, role?: string) => {
         const data = await api<{ user: User; token: string }>(`/api/auth/login`, {
           method: 'POST',
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, role }),
         });
         set({ user: data.user, token: data.token, isAuthenticated: true });
       },
-      register: async (name: string, email: string, password: string) => {
+      register: async (name: string, email: string, password: string, role?: string) => {
         const data = await api<{ user: User; token: string }>(`/api/auth/register`, {
           method: 'POST',
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({ name, email, password, role: role || 'customer' }),
         });
         set({ user: data.user, token: data.token, isAuthenticated: true });
       },

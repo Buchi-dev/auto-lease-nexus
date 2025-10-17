@@ -8,13 +8,24 @@ Scope: Vehicles, Bookings, Authentication (basic), and role-based use cases (adm
 
 ### User
 - id: string
-- name: string
-- email: string
-- role: 'admin' | 'staff' | 'customer'
+- name: string (min 2 chars, max 100 chars)
+- email: string (unique, valid email format)
+- role: 'admin' | 'staff' | 'customer' (default: 'customer')
 - avatar?: string
+- isActive?: boolean (default: true)
+- createdAt: Date
+- updatedAt: Date
+
+Password Requirements:
+- Minimum 6 characters
+- Must contain at least one uppercase letter
+- Must contain at least one lowercase letter
+- Must contain at least one number
 
 Notes:
-- Client currently uses a mock login with roles; real backend should issue a session/JWT.
+- Passwords are hashed using bcrypt (10 rounds)
+- JWT tokens are used for authentication
+- Email addresses are stored in lowercase
 
 ### Vehicle
 - id: string
@@ -70,15 +81,35 @@ Status lifecycle (typical):
 Base URL suggestion: /api
 
 ### Auth
-- POST /api/auth/login
-  - body: { email: string, password: string }
+- POST /api/auth/register
+  - body: { name: string, email: string, password: string, role?: 'admin' | 'staff' | 'customer' }
+  - Validation:
+    - name: required, min 2 chars, max 100 chars
+    - email: required, valid email format, unique
+    - password: required, min 6 chars, must contain uppercase, lowercase, and number
+    - role: optional, defaults to 'customer'
   - resp: { token: string, user: User }
+  - errors:
+    - 400: Validation errors
+    - 409: Email already in use
+
+- POST /api/auth/login
+  - body: { email: string, password: string, role?: string }
+  - resp: { token: string, user: User }
+  - errors:
+    - 400: Missing credentials
+    - 401: Invalid credentials
+
 - GET /api/auth/me
   - headers: Authorization: Bearer <token>
   - resp: { user: User }
-- POST /api/auth/logout (optional if using server sessions)
+  - errors:
+    - 401: Unauthorized
 
-Note: Client currently mocks auth; wire later. For now, server may return a static token and mock user per role for development.
+- POST /api/auth/logout (optional if using server sessions)
+  - resp: { ok: true }
+
+Note: JWT tokens are used for authentication. Tokens expire in 7 days by default.
 
 ### Vehicles
 - GET /api/vehicles

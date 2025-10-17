@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaCar, FaEnvelope, FaLock } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuthStore } from '@/store/authStore';
 import { UserRole } from '@/types';
 import { toast } from 'sonner';
@@ -59,38 +59,7 @@ export default function Login() {
           <p className="text-muted-foreground">Professional Car Rental Management System</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Role Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Your Role</CardTitle>
-              <CardDescription>Choose how you want to access the system</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {roles.map((role) => (
-                <motion.button
-                  key={role.value}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedRole(role.value)}
-                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                    selectedRole === role.value
-                      ? 'border-primary shadow-lg'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-lg">{role.label}</h3>
-                      <p className="text-sm text-muted-foreground">{role.description}</p>
-                    </div>
-                    <div className={`w-12 h-12 rounded-full ${role.gradient}`} />
-                  </div>
-                </motion.button>
-              ))}
-            </CardContent>
-          </Card>
-
+        <div className="grid md:grid-cols-2 gap-6">      
           {/* Login Form */}
           <Card>
             <CardHeader>
@@ -145,6 +114,14 @@ export default function Login() {
                 </div>
               </form>
             </CardContent>
+            <CardFooter className="flex flex-col space-y-2">
+              <div className="text-center text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-primary hover:underline font-medium">
+                  Sign up now
+                </Link>
+              </div>
+            </CardFooter>
           </Card>
         </div>
       </motion.div>

@@ -4,8 +4,21 @@ const ROLES = ['admin', 'staff', 'customer'];
 
 const UserSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    name: { 
+      type: String, 
+      required: [true, 'Name is required'], 
+      trim: true,
+      minlength: [2, 'Name must be at least 2 characters long'],
+      maxlength: [100, 'Name cannot exceed 100 characters']
+    },
+    email: { 
+      type: String, 
+      required: [true, 'Email is required'], 
+      unique: true, 
+      lowercase: true, 
+      trim: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please provide a valid email address']
+    },
     passwordHash: { type: String, required: true, select: false },
     role: { type: String, enum: ROLES, default: 'customer', index: true },
     avatar: { type: String, default: '' },

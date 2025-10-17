@@ -13,15 +13,45 @@ function signToken(user) {
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
+    
+    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({ error: { message: 'name, email, password are required', code: 'BAD_REQUEST' } });
     }
+
+    // Validate name length
+    if (name.trim().length < 2) {
+      return res.status(400).json({ error: { message: 'Name must be at least 2 characters long', code: 'BAD_REQUEST' } });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: { message: 'Please provide a valid email address', code: 'BAD_REQUEST' } });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res.status(400).json({ error: { message: 'Password must be at least 6 characters long', code: 'BAD_REQUEST' } });
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return res.status(400).json({ error: { message: 'Password must contain uppercase, lowercase, and number', code: 'BAD_REQUEST' } });
+    }
+
+    // Validate role
+    const validRoles = ['admin', 'staff', 'customer'];
+    const userRole = role || 'customer';
+    if (!validRoles.includes(userRole)) {
+      return res.status(400).json({ error: { message: 'Invalid role specified', code: 'BAD_REQUEST' } });
+    }
+    
     const existing = await User.findOne({ email: email.toLowerCase() }).lean();
     if (existing) {
       return res.status(409).json({ error: { message: 'Email already in use', code: 'CONFLICT' } });
     }
+    
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, passwordHash, role: role || 'customer' });
+    const user = await User.create({ name: name.trim(), email: email.toLowerCase().trim(), passwordHash, role: userRole });
     const token = signToken(user);
     res.status(201).json({ user: user.toSafeJSON(), token });
   } catch (err) {
