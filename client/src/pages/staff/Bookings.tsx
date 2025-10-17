@@ -54,77 +54,27 @@ export default function StaffBookings() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Mock data for now - replace with actual API call
-      const mockBookings: Booking[] = [
-        {
-          id: 'BK001',
-          vehicleId: 'Toyota Camry 2024',
-          customerId: 'John Doe',
-          pickupDate: new Date('2025-10-20'),
-          returnDate: new Date('2025-10-25'),
-          status: 'confirmed',
-          totalPrice: 450,
-          location: 'Downtown Office'
-        },
-        {
-          id: 'BK002',
-          vehicleId: 'Honda CR-V 2024',
-          customerId: 'Jane Smith',
-          pickupDate: new Date('2025-10-18'),
-          returnDate: new Date('2025-10-22'),
-          status: 'active',
-          totalPrice: 320,
-          location: 'Airport Terminal'
-        },
-        {
-          id: 'BK003',
-          vehicleId: 'Tesla Model 3',
-          customerId: 'Mike Johnson',
-          pickupDate: new Date('2025-10-22'),
-          returnDate: new Date('2025-10-27'),
-          status: 'pending',
-          totalPrice: 650,
-          location: 'North Branch'
-        },
-        {
-          id: 'BK004',
-          vehicleId: 'Ford F-150',
-          customerId: 'Sarah Williams',
-          pickupDate: new Date('2025-10-10'),
-          returnDate: new Date('2025-10-15'),
-          status: 'completed',
-          totalPrice: 550,
-          location: 'Downtown Office'
-        },
-        {
-          id: 'BK005',
-          vehicleId: 'BMW X5',
-          customerId: 'Robert Brown',
-          pickupDate: new Date('2025-10-12'),
-          returnDate: new Date('2025-10-14'),
-          status: 'cancelled',
-          totalPrice: 280,
-          location: 'Airport Terminal'
-        }
-      ];
-      setBookings(mockBookings);
+      const res = await api.listBookings({ page: 1, limit: 100 });
+      setBookings(res.data);
     } catch (error) {
       toast.error('Failed to load bookings');
+      console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleStatusUpdate = async () => {
-    if (!selectedBooking) return;
+    if (!selectedBooking || !editStatus) return;
     
     try {
-      // Mock API call - replace with actual implementation
+      await api.updateBooking(selectedBooking.id, { status: editStatus as any });
       toast.success('Booking status updated successfully');
       setEditOpen(false);
       fetchBookings();
     } catch (error) {
       toast.error('Failed to update booking status');
+      console.error('Error updating booking:', error);
     }
   };
 

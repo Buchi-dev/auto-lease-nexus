@@ -27,25 +27,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  avatar?: string;
-  totalBookings: number;
-  activeBookings: number;
-  totalSpent: number;
-  joinDate: Date;
-  status: 'active' | 'inactive';
-}
+import { api } from '@/lib/api';
+import type { User } from '@/types';
 
 export default function Customers() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
@@ -55,48 +44,11 @@ export default function Customers() {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      // Mock data for now - replace with actual API call
-      const mockCustomers: Customer[] = [
-        {
-          id: '1',
-          name: 'John Doe',
-          email: 'john@example.com',
-          phone: '+1 (555) 123-4567',
-          avatar: '',
-          totalBookings: 12,
-          activeBookings: 1,
-          totalSpent: 4500,
-          joinDate: new Date('2024-01-15'),
-          status: 'active'
-        },
-        {
-          id: '2',
-          name: 'Jane Smith',
-          email: 'jane@example.com',
-          phone: '+1 (555) 234-5678',
-          avatar: '',
-          totalBookings: 8,
-          activeBookings: 0,
-          totalSpent: 3200,
-          joinDate: new Date('2024-03-22'),
-          status: 'active'
-        },
-        {
-          id: '3',
-          name: 'Mike Johnson',
-          email: 'mike@example.com',
-          phone: '+1 (555) 345-6789',
-          avatar: '',
-          totalBookings: 5,
-          activeBookings: 2,
-          totalSpent: 2100,
-          joinDate: new Date('2024-06-10'),
-          status: 'active'
-        }
-      ];
-      setCustomers(mockCustomers);
+      const res = await api.listUsers({ role: 'customer', page: 1, limit: 100 });
+      setCustomers(res.data);
     } catch (error) {
       toast.error('Failed to load customers');
+      console.error('Error fetching customers:', error);
     } finally {
       setLoading(false);
     }
@@ -104,8 +56,7 @@ export default function Customers() {
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
+    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const stats = [
@@ -116,21 +67,21 @@ export default function Customers() {
       color: 'text-blue-500',
     },
     {
-      title: 'Active Bookings',
-      value: customers.reduce((sum, c) => sum + c.activeBookings, 0),
+      title: 'Active Customers',
+      value: customers.filter(c => c.isActive).length,
       icon: FaCar,
       color: 'text-green-500',
     },
     {
-      title: 'Total Revenue',
-      value: `$${customers.reduce((sum, c) => sum + c.totalSpent, 0).toLocaleString()}`,
+      title: 'Inactive Customers',
+      value: customers.filter(c => !c.isActive).length,
       icon: FaCalendarAlt,
       color: 'text-purple-500',
     },
     {
-      title: 'Avg. Bookings',
-      value: (customers.reduce((sum, c) => sum + c.totalBookings, 0) / customers.length || 0).toFixed(1),
-      icon: FaCalendarAlt,
+      title: 'Customer Accounts',
+      value: customers.length,
+      icon: FaUserPlus,
       color: 'text-orange-500',
     },
   ];
@@ -215,10 +166,8 @@ export default function Customers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Customer</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Total Bookings</TableHead>
-                    <TableHead>Active</TableHead>
-                    <TableHead>Total Spent</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -235,33 +184,25 @@ export default function Customers() {
                           <div>
                             <p className="font-medium">{customer.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              Joined {new Date(customer.joinDate).toLocaleDateString()}
+                              ID: {customer.id.slice(0, 8)}
                             </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <FaEnvelope className="text-muted-foreground" />
-                            {customer.email}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <FaPhone className="text-muted-foreground" />
-                            {customer.phone}
-                          </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <FaEnvelope className="text-muted-foreground" />
+                          {customer.email}
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">{customer.totalBookings}</TableCell>
                       <TableCell>
-                        <Badge variant={customer.activeBookings > 0 ? 'default' : 'secondary'}>
-                          {customer.activeBookings}
+                        <Badge className={customer.role === 'admin' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}>
+                          {customer.role}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-medium">${customer.totalSpent.toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                          {customer.status}
+                        <Badge variant={customer.isActive ? 'default' : 'secondary'}>
+                          {customer.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -318,32 +259,22 @@ export default function Customers() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <p className="font-medium">{selectedCustomer.phone}</p>
+                    <p className="text-sm text-muted-foreground">User ID</p>
+                    <p className="font-medium font-mono text-xs">{selectedCustomer.id}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge variant={selectedCustomer.status === 'active' ? 'default' : 'secondary'}>
-                      {selectedCustomer.status}
+                    <Badge variant={selectedCustomer.isActive ? 'default' : 'secondary'}>
+                      {selectedCustomer.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Bookings</p>
-                    <p className="font-medium">{selectedCustomer.totalBookings}</p>
+                    <p className="text-sm text-muted-foreground">Role</p>
+                    <p className="font-medium">{selectedCustomer.role}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Active Bookings</p>
-                    <p className="font-medium">{selectedCustomer.activeBookings}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Spent</p>
-                    <p className="font-medium">${selectedCustomer.totalSpent.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Join Date</p>
-                    <p className="font-medium">
-                      {new Date(selectedCustomer.joinDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Account</p>
+                    <p className="font-medium">{selectedCustomer.isActive ? 'Verified' : 'Not Verified'}</p>
                   </div>
                 </div>
               </div>

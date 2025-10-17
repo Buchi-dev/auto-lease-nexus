@@ -37,42 +37,11 @@ export default function MyBookings() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Mock data for now - replace with actual API call
-      const mockBookings: Booking[] = [
-        {
-          id: '1',
-          vehicleId: 'v1',
-          customerId: user?.id || '',
-          pickupDate: new Date('2025-10-20'),
-          returnDate: new Date('2025-10-25'),
-          status: 'confirmed',
-          totalPrice: 450,
-          location: 'Downtown Office'
-        },
-        {
-          id: '2',
-          vehicleId: 'v2',
-          customerId: user?.id || '',
-          pickupDate: new Date('2025-10-18'),
-          returnDate: new Date('2025-10-22'),
-          status: 'active',
-          totalPrice: 320,
-          location: 'Airport Terminal'
-        },
-        {
-          id: '3',
-          vehicleId: 'v3',
-          customerId: user?.id || '',
-          pickupDate: new Date('2025-10-10'),
-          returnDate: new Date('2025-10-15'),
-          status: 'completed',
-          totalPrice: 550,
-          location: 'North Branch'
-        }
-      ];
-      setBookings(mockBookings);
+      const res = await api.getMyBookings({ customerId: user?.id, page: 1, limit: 100 });
+      setBookings(res.data);
     } catch (error) {
       toast.error('Failed to load bookings');
+      console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
     }

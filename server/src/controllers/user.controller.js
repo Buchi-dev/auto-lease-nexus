@@ -30,6 +30,17 @@ exports.list = async (req, res) => {
   }
 };
 
+exports.getById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).lean();
+    if (!user) return res.status(404).json({ error: { message: 'User not found', code: 'NOT_FOUND' } });
+    delete user.passwordHash;
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const { name, email, role, password } = req.body || {};

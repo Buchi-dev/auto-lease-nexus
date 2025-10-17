@@ -97,3 +97,62 @@ exports.listBookings = async (req, res) => {
     res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
   }
 };
+
+exports.getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('vehicle').lean();
+    if (!booking) return res.status(404).json({ error: { message: 'Booking not found', code: 'NOT_FOUND' } });
+    res.json(booking);
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};
+
+exports.updateBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, pickupDate, returnDate, location } = req.body;
+    
+    const update = {};
+    if (status !== undefined) update.status = status;
+    if (pickupDate !== undefined) update.pickupDate = new Date(pickupDate);
+    if (returnDate !== undefined) update.returnDate = new Date(returnDate);
+    if (location !== undefined) update.location = location;
+
+    // Recalculate price if dates change
+    if (pickupDate || returnDate) {
+      const booking = await Booking.findById(id).populate('vehicle');
+      if (!booking) return res.status(404).json({ error: { message: 'Booking not found', code: 'NOT_FOUND' } });
+      
+      const start = pickupDate ? new Date(pickupDate) : booking.pickupDate;
+      const end = returnDate ? new Date(returnDate) : booking.returnDate;
+      
+      if (start >= end) {
+        return res.status(422).json({ error: { message: 'pickupDate must be before returnDate', code: 'VALIDATION_ERROR' } });
+      }
+      
+      const vehicle = booking.vehicle;
+      update.totalPrice = daysBetween(start, end) * vehicle.dailyRate;
+    }
+
+    const booking = await Booking.findByIdAndUpdate(id, update, { new: true, runValidators: true }).populate('vehicle');
+    if (!booking) return res.status(404).json({ error: { message: 'Booking not found', code: 'NOT_FOUND' } });
+    res.json(booking);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({ error: { message: 'Validation failed', code: 'VALIDATION_ERROR', details: err.errors } });
+    }
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};
+
+exports.deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findByIdAndDelete(id);
+    if (!booking) return res.status(404).json({ error: { message: 'Booking not found', code: 'NOT_FOUND' } });
+    res.json({ ok: true, message: 'Booking deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};

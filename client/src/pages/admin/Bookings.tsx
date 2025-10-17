@@ -53,42 +53,15 @@ export default function Bookings() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Mock data for now - replace with actual API call
-      const mockBookings: Booking[] = [
-        {
-          id: '1',
-          vehicleId: 'v1',
-          customerId: 'c1',
-          pickupDate: new Date('2025-10-20'),
-          returnDate: new Date('2025-10-25'),
-          status: 'pending',
-          totalPrice: 450,
-          location: 'Downtown Office'
-        },
-        {
-          id: '2',
-          vehicleId: 'v2',
-          customerId: 'c2',
-          pickupDate: new Date('2025-10-18'),
-          returnDate: new Date('2025-10-22'),
-          status: 'confirmed',
-          totalPrice: 320,
-          location: 'Airport Terminal'
-        },
-        {
-          id: '3',
-          vehicleId: 'v3',
-          customerId: 'c3',
-          pickupDate: new Date('2025-10-15'),
-          returnDate: new Date('2025-10-19'),
-          status: 'active',
-          totalPrice: 550,
-          location: 'North Branch'
-        }
-      ];
-      setBookings(mockBookings);
+      const params: any = { page: 1, limit: 100 };
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
+      const res = await api.listBookings(params);
+      setBookings(res.data);
     } catch (error) {
       toast.error('Failed to load bookings');
+      console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
     }
@@ -129,11 +102,24 @@ export default function Bookings() {
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      // Mock API call - replace with actual implementation
-      toast.success(`Booking ${newStatus}`);
+      await api.updateBooking(bookingId, { status: newStatus as any });
+      toast.success(`Booking status updated to ${newStatus}`);
       fetchBookings();
     } catch (error) {
       toast.error('Failed to update booking');
+      console.error('Error updating booking:', error);
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to delete this booking?')) return;
+    try {
+      await api.deleteBooking(bookingId);
+      toast.success('Booking deleted successfully');
+      fetchBookings();
+    } catch (error) {
+      toast.error('Failed to delete booking');
+      console.error('Error deleting booking:', error);
     }
   };
 

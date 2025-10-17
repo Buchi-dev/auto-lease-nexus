@@ -103,3 +103,33 @@ exports.createVehicle = async (req, res) => {
     res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
   }
 };
+
+exports.updateVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const update = { ...req.body };
+    delete update._id;
+    delete update.createdAt;
+    delete update.updatedAt;
+    
+    const v = await Vehicle.findByIdAndUpdate(id, update, { new: true, runValidators: true });
+    if (!v) return res.status(404).json({ error: { message: 'Vehicle not found', code: 'NOT_FOUND' } });
+    res.json(v);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({ error: { message: 'Validation failed', code: 'VALIDATION_ERROR', details: err.errors } });
+    }
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};
+
+exports.deleteVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const v = await Vehicle.findByIdAndDelete(id);
+    if (!v) return res.status(404).json({ error: { message: 'Vehicle not found', code: 'NOT_FOUND' } });
+    res.json({ ok: true, message: 'Vehicle deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message, code: 'INTERNAL_ERROR' } });
+  }
+};

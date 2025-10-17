@@ -7,6 +7,7 @@ const { authRequired, requireRoles } = require('../middlewares/auth.middleware')
 router.use(authRequired, requireRoles('admin'));
 
 router.get('/', UserController.list);
+router.get('/:id', UserController.getById);
 router.post('/', UserController.create);
 router.patch('/:id', UserController.update);
 router.delete('/:id', UserController.remove);
